@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:path/path.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart'; // Import this for path manipulation
+import 'package:path_provider/path_provider.dart';
 
 import '../database/contacts.dart';
 
@@ -9,8 +12,15 @@ class DBHelper {
 
   // This method initializes the SQLite database
   static Future<Database> initDB() async {
+
     var dbPath = await getDatabasesPath();
+    print('======================dbPath $dbPath');
+
+    Directory? externalStoragePath = await getExternalStorageDirectory();
+    print('======================fileManagerPath $dbPath');
+
     String path = join(dbPath, 'contacts.db');
+
 
     // Open the database with versioning and migration support
     return await openDatabase(path,
@@ -66,4 +76,63 @@ class DBHelper {
     Database db = await DBHelper.initDB();
     return await db.delete('contacts', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future backupDB() async {
+    var status = await Permission.manageExternalStorage.status;
+
+    if(!status.isGranted) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    var status1 = await Permission.storage.status;
+
+    if(!status.isGranted) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    try{
+      File ourDBFile = File('/data/user/0/com.example.accounts/databases/contacts.db');
+      Directory? folderPathforDBFile = Directory('/data/user/0/com.example.accounts/databases');
+
+    } catch (e) {
+      print('============================error backup: ${e.toString()}');
+    }
+  }
+
+  restoreDB() async {
+
+    var status = await Permission.manageExternalStorage.status;
+
+    if(!status.isGranted) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    var status1 = await Permission.storage.status;
+
+    if(!status.isGranted) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    try{
+
+      File savedDBFile = File('/data/user/0/com.example.accounts/databases/contacts.db');
+      
+      await savedDBFile.copy('/data/user/0/com.example.accounts/databases');
+
+
+    } catch (e) {
+      print('============================error restore: ${e.toString()}');
+    }
+
+  }
+
+  deleteDB() async {
+    try{
+      // _database = null;
+      deleteDatabase('/data/user/0/com.example.accounts/databases/contacts.db');
+    } catch (e) {
+      print('============================error delete: ${e.toString()}');
+    }
+  }
+
 }

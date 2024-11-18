@@ -11,6 +11,10 @@ class Demo extends StatefulWidget {
 }
 
 class _DemoState extends State<Demo> {
+  // Helper method to trigger FutureBuilder refresh
+  Future<List<Contact>> _getContacts() async {
+    return await DBHelper.readContacts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,83 +22,144 @@ class _DemoState extends State<Demo> {
       appBar: AppBar(
         title: Text('Flutter SQFLite'),
       ),
-      //add Future Builder to get contacts
-      body: FutureBuilder<List<Contact>>(
-        future: DBHelper.readContacts(), //read contacts list here
-        builder: (BuildContext context, AsyncSnapshot<List<Contact>> snapshot) {
-          //if snapshot has no data yet
-          if (!snapshot.hasData) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  CircularProgressIndicator(),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text('Loading...'),
-                ],
-              ),
-            );
-          }
-          //if snapshot return empty [], show text
-          //else show contact list
-          return snapshot.data!.isEmpty
-              ? Center(
-                  child: Text('No Contact in List yet!'),
-                )
-              : ListView(
-                  children: snapshot.data!.map((contacts) {
-                    return Center(
-                      child: ListTile(
-                        title: Text(contacts.name),
-                        subtitle: Text(contacts.contact),
+      // Add Future Builder to get contacts
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Row to align buttons horizontally
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute buttons evenly
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Implement your backup functionality
+                  },
+                  child: Text("Backup"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await DBHelper.initDB();
+                    // await DBHelper.backupDB();
+                  },
+                  child: Text("Restore"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Implement functionality for button 3
+                  },
+                  child: Text("Delete"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Navigate to add new contact page
+                    final refresh = await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => AddContacts()),
+                    );
+
+                    // Refresh if a contact was added
+                    if (refresh != null && refresh) {
+                      setState(() {
+                        // Trigger a rebuild after adding a contact
+                      });
+                    }
+                  },
+                  child: Text("Add"),
+                ),
+              ],
+            ),
+            SizedBox(height: 16), // Space between buttons and FutureBuilder
+
+            // FutureBuilder to fetch contacts
+            FutureBuilder<List<Contact>>(
+              future: _getContacts(), // Fetch contacts
+              builder: (BuildContext context, AsyncSnapshot<List<Contact>> snapshot) {
+                // Check if data is being fetched
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        SizedBox(height: 20),
+                        Text('Loading...'),
+                      ],
+                    ),
+                  );
+                }
+
+                // If no contacts are found
+                if (snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text('No Contact in List yet!'),
+                  );
+                }
+
+                // Display contacts in a ListView
+                return Expanded(
+                  child: ListView(
+                    children: snapshot.data!.map((contact) {
+                      return ListTile(
+                        title: Text(contact.name),
+                        subtitle: Text(contact.contact),
                         trailing: IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: () async {
-                            await DBHelper.deleteContacts(contacts.id!);
+                            // Delete contact
+                            await DBHelper.deleteContacts(contact.id!);
                             setState(() {
-                              //rebuild widget after delete
+                              // Trigger a rebuild after deleting
                             });
                           },
                         ),
                         onTap: () async {
-                          //tap on ListTile, for update
-                          final refresh = await Navigator.of(context)
-                              .push(MaterialPageRoute(
-                                  builder: (_) => AddContacts(
-                                        contact: Contact(
-                                          id: contacts.id,
-                                          name: contacts.name,
-                                          contact: contacts.contact,
-                                        ),
-                                      )));
+                          // Tap on contact to update
+                          final refresh = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => AddContacts(
+                                contact: Contact(
+                                  id: contact.id,
+                                  name: contact.name,
+                                  contact: contact.contact,
+                                ),
+                              ),
+                            ),
+                          );
 
-                          if (refresh) {
+                          // Refresh if updated
+                          if (refresh != null && refresh) {
                             setState(() {
-                              //if return true, rebuild whole widget
+                              // Trigger a rebuild after updating
                             });
                           }
                         },
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 );
-        },
+              },
+            ),
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () async {
-          final refresh = await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => AddContacts()));
 
-          if (refresh) {
-            setState(() {
-              //if return true, rebuild whole widget
-            });
-          }
-        },
-      ),
+      // Floating action button to add new contact
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(Icons.add),
+      //   onPressed: () async {
+      //     // Navigate to add new contact page
+      //     final refresh = await Navigator.of(context).push(
+      //       MaterialPageRoute(builder: (_) => AddContacts()),
+      //     );
+      //
+      //     // Refresh if a contact was added
+      //     if (refresh != null && refresh) {
+      //       setState(() {
+      //         // Trigger a rebuild after adding a contact
+      //       });
+      //     }
+      //   },
+      // ),
     );
   }
 }
