@@ -11,8 +11,11 @@ class Demo extends StatefulWidget {
 }
 
 class _DemoState extends State<Demo> {
+
+  DBHelper dbHelper = DBHelper();  // Create an instance of DBHelper
+
   // Helper method to trigger FutureBuilder refresh
-  Future<List<Contact>> _getContacts() async {
+  Future<List<Contact>> getContacts() async {
     return await DBHelper.readContacts();
   }
 
@@ -32,21 +35,29 @@ class _DemoState extends State<Demo> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute buttons evenly
               children: [
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // Implement your backup functionality
+                    await DBHelper.backupDB();
                   },
                   child: Text("Backup"),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await DBHelper.initDB();
-                    // await DBHelper.backupDB();
+                    // Implement your restore functionality
+                    await DBHelper.restoreDB();
+                    setState(() {
+                      getContacts();
+                    });
                   },
                   child: Text("Restore"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    // Implement functionality for button 3
+                  onPressed: () async {
+                    // Implement functionality for delete database
+                    await DBHelper.deleteDB();
+                    setState(() {
+                      getContacts();
+                    });
                   },
                   child: Text("Delete"),
                 ),
@@ -72,7 +83,7 @@ class _DemoState extends State<Demo> {
 
             // FutureBuilder to fetch contacts
             FutureBuilder<List<Contact>>(
-              future: _getContacts(), // Fetch contacts
+              future: getContacts(), // Fetch contacts
               builder: (BuildContext context, AsyncSnapshot<List<Contact>> snapshot) {
                 // Check if data is being fetched
                 if (!snapshot.hasData) {
