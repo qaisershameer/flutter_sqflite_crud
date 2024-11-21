@@ -1,0 +1,85 @@
+Single Function _onCreate All Tables By ChatGpt.
+
+static Future _onCreate(Database db, int version) async {
+  // Create the "contacts" table
+  final sqlContacts = '''CREATE TABLE contacts(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    contact TEXT
+  )''';
+  await db.execute(sqlContacts);
+
+  // Create the "users" table
+  final sqlUsers = '''CREATE TABLE users(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    password TEXT
+  )''';
+  await db.execute(sqlUsers);
+
+  // Create the "orders" table
+  final sqlOrders = '''CREATE TABLE orders(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    product_name TEXT,
+    quantity INTEGER,
+    price REAL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )''';
+  await db.execute(sqlOrders);
+
+  // Create the "products" table
+  final sqlProducts = '''CREATE TABLE products(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    description TEXT,
+    price REAL
+  )''';
+  await db.execute(sqlProducts);
+
+  // Create the "transactions" table
+  final sqlTransactions = '''CREATE TABLE transactions(
+    id INTEGER PRIMARY KEY,
+    order_id INTEGER,
+    amount REAL,
+    transaction_date TEXT,
+    FOREIGN KEY(order_id) REFERENCES orders(id)
+  )''';
+  await db.execute(sqlTransactions);
+
+  // Create the "inventory" table
+  final sqlInventory = '''CREATE TABLE inventory(
+    id INTEGER PRIMARY KEY,
+    product_id INTEGER,
+    stock_quantity INTEGER,
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )''';
+  await db.execute(sqlInventory);
+
+  // Create the "payments" table
+  final sqlPayments = '''CREATE TABLE payments(
+    id INTEGER PRIMARY KEY,
+    transaction_id INTEGER,
+    payment_method TEXT,
+    amount REAL,
+    payment_date TEXT,
+    FOREIGN KEY(transaction_id) REFERENCES transactions(id)
+  )''';
+  await db.execute(sqlPayments);
+
+  // Create the "reviews" table
+  final sqlReviews = '''CREATE TABLE reviews(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    product_id INTEGER,
+    rating INTEGER,
+    review_text TEXT,
+    review_date TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )''';
+  await db.execute(sqlReviews);
+
+  // Add more tables here as needed...
+}

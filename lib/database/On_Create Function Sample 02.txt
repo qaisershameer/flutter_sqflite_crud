@@ -1,0 +1,226 @@
+static Future _onCreate(Database db, int version) async {
+  // Create the "contacts" table
+  final sqlContacts = '''CREATE TABLE contacts(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    contact TEXT
+  )''';
+  await db.execute(sqlContacts);
+
+  // Create the "users" table
+  final sqlUsers = '''CREATE TABLE users(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    password TEXT
+  )''';
+  await db.execute(sqlUsers);
+
+  // Create the "orders" table
+  final sqlOrders = '''CREATE TABLE orders(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    product_name TEXT,
+    quantity INTEGER,
+    price REAL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )''';
+  await db.execute(sqlOrders);
+
+  // Create the "products" table
+  final sqlProducts = '''CREATE TABLE products(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    description TEXT,
+    price REAL
+  )''';
+  await db.execute(sqlProducts);
+
+  // Create the "transactions" table
+  final sqlTransactions = '''CREATE TABLE transactions(
+    id INTEGER PRIMARY KEY,
+    order_id INTEGER,
+    amount REAL,
+    transaction_date TEXT,
+    FOREIGN KEY(order_id) REFERENCES orders(id)
+  )''';
+  await db.execute(sqlTransactions);
+
+  // Create the "inventory" table
+  final sqlInventory = '''CREATE TABLE inventory(
+    id INTEGER PRIMARY KEY,
+    product_id INTEGER,
+    stock_quantity INTEGER,
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )''';
+  await db.execute(sqlInventory);
+
+  // Create the "payments" table
+  final sqlPayments = '''CREATE TABLE payments(
+    id INTEGER PRIMARY KEY,
+    transaction_id INTEGER,
+    payment_method TEXT,
+    amount REAL,
+    payment_date TEXT,
+    FOREIGN KEY(transaction_id) REFERENCES transactions(id)
+  )''';
+  await db.execute(sqlPayments);
+
+  // Create the "reviews" table
+  final sqlReviews = '''CREATE TABLE reviews(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    product_id INTEGER,
+    rating INTEGER,
+    review_text TEXT,
+    review_date TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )''';
+  await db.execute(sqlReviews);
+
+  // Create the "accounts" table
+  final sqlAccounts = '''CREATE TABLE accounts(
+    acId INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_name TEXT NOT NULL,
+    balance REAL NOT NULL
+  )''';
+  await db.execute(sqlAccounts);
+
+  // Create the "vouchers" table
+  final sqlVouchers = '''CREATE TABLE vouchers(
+    voucherId INTEGER PRIMARY KEY AUTOINCREMENT,
+    voucherDate TEXT NOT NULL,
+    voucherPrefix TEXT NOT NULL,
+    remarks TEXT,
+    drAcId INTEGER,
+    crAcId INTEGER,
+    debit REAL NOT NULL DEFAULT 0,
+    credit REAL NOT NULL DEFAULT 0,
+    debitSR REAL NOT NULL DEFAULT 0,
+    creditSR REAL NOT NULL DEFAULT 0,
+    uId INTEGER NOT NULL,
+    created_at TEXT,
+    updated_at TEXT,
+    FOREIGN KEY (crAcId) REFERENCES accounts(acId),
+    FOREIGN KEY (drAcId) REFERENCES accounts(acId),
+    FOREIGN KEY (uId) REFERENCES users(id)
+  )''';
+  await db.execute(sqlVouchers);
+
+  // Create the "payments" table
+  final sqlPaymentsTransactions = '''CREATE TABLE payments_transactions(
+    id INTEGER PRIMARY KEY,
+    payment_id INTEGER,
+    transaction_id INTEGER,
+    amount REAL,
+    payment_date TEXT,
+    FOREIGN KEY(payment_id) REFERENCES payments(id),
+    FOREIGN KEY(transaction_id) REFERENCES transactions(id)
+  )''';
+  await db.execute(sqlPaymentsTransactions);
+
+  // Create the "transaction_details" table
+  final sqlTransactionDetails = '''CREATE TABLE transaction_details(
+    id INTEGER PRIMARY KEY,
+    transaction_id INTEGER,
+    detail_type TEXT,
+    amount REAL,
+    FOREIGN KEY(transaction_id) REFERENCES transactions(id)
+  )''';
+  await db.execute(sqlTransactionDetails);
+
+  // Create the "sales" table
+  final sqlSales = '''CREATE TABLE sales(
+    sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    total_amount REAL,
+    sale_date TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )''';
+  await db.execute(sqlSales);
+
+  // Create the "sales_items" table
+  final sqlSalesItems = '''CREATE TABLE sales_items(
+    sale_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_id INTEGER,
+    product_id INTEGER,
+    quantity INTEGER,
+    unit_price REAL,
+    FOREIGN KEY(sale_id) REFERENCES sales(sale_id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )''';
+  await db.execute(sqlSalesItems);
+
+  // Create the "purchases" table
+  final sqlPurchases = '''CREATE TABLE purchases(
+    purchase_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    supplier_id INTEGER,
+    total_amount REAL,
+    purchase_date TEXT,
+    FOREIGN KEY(supplier_id) REFERENCES users(id)
+  )''';
+  await db.execute(sqlPurchases);
+
+  // Create the "purchase_items" table
+  final sqlPurchaseItems = '''CREATE TABLE purchase_items(
+    purchase_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    purchase_id INTEGER,
+    product_id INTEGER,
+    quantity INTEGER,
+    unit_price REAL,
+    FOREIGN KEY(purchase_id) REFERENCES purchases(purchase_id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
+  )''';
+  await db.execute(sqlPurchaseItems);
+
+  // Create the "suppliers" table
+  final sqlSuppliers = '''CREATE TABLE suppliers(
+    supplier_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    supplier_name TEXT,
+    supplier_address TEXT,
+    contact_number TEXT
+  )''';
+  await db.execute(sqlSuppliers);
+
+  // Create the "settings" table
+  final sqlSettings = '''CREATE TABLE settings(
+    setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    setting_name TEXT,
+    setting_value TEXT
+  )''';
+  await db.execute(sqlSettings);
+
+  // Create the "logs" table
+  final sqlLogs = '''CREATE TABLE logs(
+    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    log_type TEXT,
+    log_message TEXT,
+    created_at TEXT
+  )''';
+  await db.execute(sqlLogs);
+}
+
+
+Explanation of the 20 Tables:
+contacts: Stores contact details with id, name, and contact.
+users: Stores user details like id, name, email, and password.
+orders: Stores orders with id, user_id, product_name, quantity, price.
+products: Stores product details with id, name, description, and price.
+transactions: Stores transaction details with id, order_id, amount, and transaction_date.
+inventory: Stores inventory data with id, product_id, and stock_quantity.
+payments: Stores payment information with id, transaction_id, payment_method, amount, and payment_date.
+reviews: Stores product reviews with id, user_id, product_id, rating, review_text, and review_date.
+accounts: Stores account data with acId, account_name, and balance.
+vouchers: Stores voucher details with voucherId, voucherDate, voucherPrefix, and remarks. Also contains foreign key references to accounts and users.
+payments_transactions: Stores mapping between payments and transactions.
+transaction_details: Stores additional details about transactions like transaction_id, detail_type, and amount.
+sales: Stores sales transactions with sale_id, user_id, total_amount, and sale_date.
+sales_items: Stores items in a sale, with sale_item_id, sale_id, product_id, quantity, and unit_price.
+purchases: Stores purchase transactions with purchase_id, supplier_id, total_amount, and purchase_date.
+purchase_items: Stores items in a purchase with purchase_item_id, purchase_id, product_id, quantity, and unit_price.
+suppliers: Stores supplier details with supplier_id, supplier_name, supplier_address, and contact_number.
+settings: Stores configuration settings with setting_id, setting_name, and setting_value.
+logs: Stores log details with log_id, log_type, log_message, and created_at.
+Usage:
+This _onCreate function should be called when initializing the SQLite database, ensuring that all 20 tables are created properly. Let me know if you need further adjustments!

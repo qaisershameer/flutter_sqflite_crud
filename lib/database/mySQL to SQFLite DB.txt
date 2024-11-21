@@ -1,0 +1,272 @@
+MySQL to SQFLite Database via Chat GPT
+==========================================
+
+1. Users Table
+sql
+Copy code
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  usertype TEXT NOT NULL DEFAULT 'user',
+  phone TEXT,
+  address TEXT,
+  email_verified_at TEXT,
+  password TEXT NOT NULL,
+  two_factor_secret TEXT,
+  two_factor_recovery_codes TEXT,
+  two_factor_confirmed_at TEXT,
+  remember_token TEXT,
+  current_team_id INTEGER,
+  profile_photo_path TEXT,
+  created_at TEXT,
+  updated_at TEXT
+);
+2. Area Table
+sql
+Copy code
+CREATE TABLE area (
+  areaId INTEGER PRIMARY KEY AUTOINCREMENT,
+  areaTitle TEXT NOT NULL,
+  uId INTEGER NOT NULL,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (uId) REFERENCES users(id)
+);
+3. Currency Table
+sql
+Copy code
+CREATE TABLE currency (
+  currencyId INTEGER PRIMARY KEY AUTOINCREMENT,
+  currencyTitle TEXT NOT NULL,
+  uId INTEGER NOT NULL,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (uId) REFERENCES users(id)
+);
+4. AccType Table
+sql
+Copy code
+CREATE TABLE acctype (
+  accTypeId INTEGER PRIMARY KEY AUTOINCREMENT,
+  accTypeTitle TEXT NOT NULL,
+  uId INTEGER NOT NULL,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (uId) REFERENCES users(id)
+);
+5. Books Table
+sql
+Copy code
+CREATE TABLE books (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  phone TEXT NOT NULL,
+  guest TEXT NOT NULL,
+  time TEXT NOT NULL,
+  date TEXT NOT NULL,
+  note TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'Pending',
+  created_at TEXT,
+  updated_at TEXT
+);
+6. Cache Table
+sql
+Copy code
+CREATE TABLE cache (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  expiration INTEGER NOT NULL
+);
+7. Cache_Locks Table
+sql
+Copy code
+CREATE TABLE cache_locks (
+  key TEXT PRIMARY KEY,
+  owner TEXT NOT NULL,
+  expiration INTEGER NOT NULL
+);
+8. Carts Table
+sql
+Copy code
+CREATE TABLE carts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  detail TEXT,
+  image TEXT,
+  price REAL NOT NULL DEFAULT 0,
+  userid TEXT,
+  qty REAL NOT NULL DEFAULT 0,
+  created_at TEXT,
+  updated_at TEXT
+);
+9. AccParent Table
+sql
+Copy code
+CREATE TABLE accparent (
+  parentId INTEGER PRIMARY KEY AUTOINCREMENT,
+  accParentTitle TEXT NOT NULL,
+  accTypeId INTEGER NOT NULL,
+  uId INTEGER NOT NULL,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (accTypeId) REFERENCES acctype(accTypeId),
+  FOREIGN KEY (uId) REFERENCES users(id)
+);
+10. Failed Jobs Table
+sql
+Copy code
+CREATE TABLE failed_jobs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  uuid TEXT NOT NULL,
+  connection TEXT NOT NULL,
+  queue TEXT NOT NULL,
+  payload TEXT NOT NULL,
+  exception TEXT NOT NULL,
+  failed_at TEXT NOT NULL
+);
+11. Food Table
+sql
+Copy code
+CREATE TABLE food (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  detail TEXT,
+  price REAL NOT NULL DEFAULT 0,
+  image TEXT,
+  created_at TEXT,
+  updated_at TEXT
+);
+12. Job Batches Table
+sql
+Copy code
+CREATE TABLE job_batches (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  total_jobs INTEGER NOT NULL,
+  pending_jobs INTEGER NOT NULL,
+  failed_jobs INTEGER NOT NULL,
+  failed_job_ids TEXT NOT NULL,
+  options TEXT,
+  cancelled_at INTEGER,
+  created_at INTEGER NOT NULL,
+  finished_at INTEGER
+);
+13. Jobs Table
+sql
+Copy code
+CREATE TABLE jobs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  queue TEXT NOT NULL,
+  payload TEXT NOT NULL,
+  attempts INTEGER NOT NULL,
+  reserved_at INTEGER,
+  available_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL
+);
+14. Migrations Table
+sql
+Copy code
+CREATE TABLE migrations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  migration TEXT NOT NULL,
+  batch INTEGER NOT NULL
+);
+15. Orders Table
+sql
+Copy code
+CREATE TABLE orders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  email TEXT,
+  address TEXT,
+  phone TEXT,
+  title TEXT,
+  qty TEXT,
+  price TEXT,
+  image TEXT,
+  delivery_status TEXT NOT NULL DEFAULT 'In Progress',
+  created_at TEXT,
+  updated_at TEXT
+);
+16. Password Reset Tokens Table
+sql
+Copy code
+CREATE TABLE password_reset_tokens (
+  email TEXT NOT NULL PRIMARY KEY,
+  token TEXT NOT NULL,
+  created_at TEXT
+);
+17. Personal Access Tokens Table
+sql
+Copy code
+CREATE TABLE personal_access_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tokenable_type TEXT NOT NULL,
+  tokenable_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  token TEXT NOT NULL,
+  abilities TEXT,
+  last_used_at TEXT,
+  expires_at TEXT,
+  created_at TEXT,
+  updated_at TEXT
+);
+18. Sessions Table
+sql
+Copy code
+CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
+  user_id INTEGER,
+  ip_address TEXT,
+  user_agent TEXT,
+  payload TEXT NOT NULL,
+  last_activity INTEGER NOT NULL
+);
+19. Accounts Table
+sql
+Copy code
+CREATE TABLE accounts (
+  acId INTEGER PRIMARY KEY AUTOINCREMENT,
+  acTitle TEXT NOT NULL,
+  email TEXT,
+  mobile TEXT,
+  openingBal REAL NOT NULL DEFAULT 0,
+  CurrentBal REAL NOT NULL DEFAULT 0,
+  uId INTEGER NOT NULL,
+  currencyId INTEGER NOT NULL,
+  accTypeId INTEGER NOT NULL,
+  parentId INTEGER NOT NULL,
+  areaId INTEGER,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (accTypeId) REFERENCES acctype(accTypeId),
+  FOREIGN KEY (areaId) REFERENCES area(areaId),
+  FOREIGN KEY (currencyId) REFERENCES currency(currencyId),
+  FOREIGN KEY (parentId) REFERENCES accparent(parentId),
+  FOREIGN KEY (uId) REFERENCES users(id)
+);
+20. Vouchers Table
+sql
+Copy code
+CREATE TABLE vouchers (
+  voucherId INTEGER PRIMARY KEY AUTOINCREMENT,
+  voucherDate TEXT NOT NULL,
+  voucherPrefix TEXT NOT NULL,
+  remarks TEXT,
+  drAcId INTEGER,
+  crAcId INTEGER,
+  debit REAL NOT NULL DEFAULT 0,
+  credit REAL NOT NULL DEFAULT 0,
+  debitSR REAL NOT NULL DEFAULT 0,
+  creditSR REAL NOT NULL DEFAULT 0,
+  uId INTEGER NOT NULL,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (crAcId) REFERENCES accounts(acId),
+  FOREIGN KEY (drAcId) REFERENCES accounts(acId),
+  FOREIGN KEY (uId) REFERENCES users(id)
+);
+These queries have been adjusted to match the SQLite syntax and Sqflite compatibility. The primary differences include the use of INTEGER PRIMARY KEY AUTOINCREMENT instead of BIGINT IDENTITY(1,1) and TEXT instead of VARCHAR. Additionally, DATETIME has been replaced with TEXT, as SQLite stores date and time as strings.
+
+
+
